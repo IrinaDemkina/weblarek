@@ -172,7 +172,7 @@ hasItem(productId: string): boolean - проверяет нахождение т
 Валидация данных
 Очистка данных покупателя
 ### Конструктор класс и принимаемые параметры
-constructor(data?: Partial<IBuyer>)
+constructor()
 ### Поле класса
 payment: TPayment;
 email: string;

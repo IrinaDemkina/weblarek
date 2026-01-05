@@ -76,8 +76,8 @@ console.log('Общая стоимость:', basketModel.getTotalPrice(), 'ру
 console.log('Тестирование класса WebLarekApi');
 
 const api = new Api(API_URL);
-const WebLarekApiModel = new WebLarekApi(api);
-WebLarekApiModel.getProductList()
+const webLarekApiModel = new WebLarekApi(api);
+webLarekApiModel.getProductList()
   .then((data) => {
     catalogModel.saveProducts(data.items);
     console.log('Массив товаров из каталога (получен с сервера):', catalogModel.getProducts());
