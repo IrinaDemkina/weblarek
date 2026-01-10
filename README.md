@@ -202,3 +202,259 @@ isValid(): boolean - проверяет все ли данные коррект�
 ### Метод класс 
 getProductList(): Promise<IProductList> - делает get запрос на эндпоинт /product/ и возвращает массив товаров
  createOrder (order: IOrder): Promise<IOrderResult> - делает post запрос на эндпоинт /order/ и передаёт в него данные, полученные в параметрах метода
+
+ ## Классы
+
+ Card
+### Зона ответственности 
+Aбстрактный класс для всех типов карточек товара;
+Родительский класс для CatalogCard, PreviewCard, BasketCard;
+### Конструктор класс и принимаемые параметры
+constructor (container: HTMLElement, protected events: IEvents)
+### Поля класса
+protected titleCard: HTMLElement; - элемент заголовка
+protected priceCard: HTMLElement; - элемент цены
+protected idCard: string = ''; id товара
+### Методы класса
+set id(text: string) - устанавливает id товара
+ set title(text: string) - устанавливает название товара
+ set price(value: number | undefined | null) - устанавливает цену товара или "Бесценно" если null/undefined
+### Интерфейс ICard
+typescriptDownloadCopy codeinterface ICard {
+    id: string;
+    title: string;
+    price: number | null | undefined;
+}
+
+CatalogCard
+### Зона ответственности 
+Отображает карточку товара в каталоге на главной странице;
+Показывает изображение, категорию, название и цену;
+Генерирует событие при клике на карточку;
+### Конструктор класс и принимаемые параметры
+constructor(container: HTMLElement, events: IEvents)
+### Поля класса
+protected imageCard: HTMLImageElement; - изображение товара
+protected categoryCard: HTMLElement; - категория товара
+Наследует поля от Card
+### Методы класса
+set image(url: string): void - устанавливает изображение
+set category(text: string): void - устанавливает категорию
+### Интерфейс
+export interface ICatalogCard extends ICard {
+    image: string;
+    category: string;
+}
+
+PreviewCard
+### Зона ответственности 
+Отображает детальную информацию о товаре в модальном окне;
+Управляет кнопкой "Купить" / "Удалить из корзины" / "Недоступно";
+### Конструктор класс и принимаемые параметры
+constructor(container: HTMLElement, events: IEvents)
+### Поля класса
+protected imageCard: HTMLImageElement; - изображение товара
+protected categoryCard: HTMLElement; - категория товара
+protected descriptionCard: HTMLElement; - описание товара
+protected buttonCard: HTMLButtonElement; - кнопка действия
+protected priceCd: null | number |undefined; - цена товара
+### Методы класса
+  set image(value: string) - устанавливает изображение  
+  set category(value: string) - устанавливает категорию
+  set description(value: string) - устанавливает описание
+  set price(value: number | null | undefined) - устанавливает цену и блокирует кнопку если null
+  set inBasket(value: boolean) - изменяет текст кнопки в зависимости от наличия в корзине
+### Интерфейс
+export interface IPreviewCard extends ICatalogCard {
+    description: string;
+    inBasket?: boolean;
+}
+
+BasketCard
+### Зона ответственности 
+Отображает карточку товара в корзине;
+Показывает порядковый номер, название, цену;
+### Конструктор класс и принимаемые параметры
+constructor(container: HTMLElement, events: IEvents)
+### Поля класса
+    protected indexCard: HTMLElement; - порядковый номер
+    protected deleteButton: HTMLButtonElement; - кнопка удаления
+### Методы класса
+set index(value: number) - устанавливает порядковый номер
+### Интерфейс
+export interface IBasketCard extends ICard {
+    index: number;
+}
+
+Form
+### Зона ответственности 
+Абстрактный класс для всех форм;
+Управляет состоянием кнопки отправки;
+Отображает ошибки валидации;
+Родительский класс для OrderForm и ContactsForm;
+### Конструктор класс и принимаемые параметры
+constructor(protected container: HTMLFormElement, protected events: IEvents)
+### Поля класса
+    protected submitButton: HTMLButtonElement; - кнопка отправки
+    protected errorss: HTMLElement; - элемент для отображения ошибок
+### Методы класса
+ set valid(value: boolean) - управляет блокировкой кнопки отправки
+ set error(value: string) - устанавливает текст ошибки
+ protected onInputChange(field: keyof T, value: string) - обрабатывает изменение поля
+### Интерфейс
+export interface IForm {
+    valid: boolean;
+    errors: string[];
+}
+
+OrderForm
+### Зона ответственности 
+Форма первого шага оформления заказа;
+Выбор способа оплаты (card/cash);
+Ввод адреса доставки;
+### Конструктор класс и принимаемые параметры
+ constructor(container: HTMLFormElement, events: IEvents)
+### Поля класса
+    protected buttonCard: HTMLButtonElement; - кнопка выбора оплаты
+    protected buttonCash: HTMLButtonElement; - кнопка выбора оплаты
+    protected addressInput: HTMLInputElement; - поле ввода адреса
+### Методы класса
+set address(value: string) - устанавливает адрес
+set payment(value: TPayment) - устанавливает выбранный способ оплаты
+protected setPaymentMethod(method: 'card'| 'cash') - переключает активную кнопку оплаты
+### Интерфейс
+export interface IOrderForm {
+    payment: TPayment;
+    address: string;
+}
+
+ContactsForm
+### Зона ответственности
+Форма второго шага оформления заказа;
+Ввод email покупателя;
+Ввод телефона покупателя;
+Валидация данных;
+Управление активностью кнопки "Оплатить";
+### Конструктор класс и принимаемые параметры
+ constructor(container: HTMLFormElement, events: IEvents)
+### Поля класса
+protected phoneInput: HTMLInputElement; - поле ввода телефона
+protected emailInput: HTMLInputElement; - поле ввода email
+
+### Методы класса
+set email(value: string) - устанавливает email
+  set phone(value: string) - устанавливает телефон
+### Интерфейс
+export interface IContactsForm {
+    phone: string;
+    email: string;
+}
+
+Modal
+### Зона ответственности 
+Управляет модальным окном;
+Открытие и закрытие модального окна;
+Блокировка прокрутки страницы при открытии;
+Закрытие по клику на оверлей или кнопку закрытия;
+### Конструктор класс и принимаемые параметры
+ constructor(protected events: IEvents, container: HTMLElement) 
+### Поля класса
+protected closeButton: HTMLButtonElement; контейнер для контента
+protected cntentInModal: HTMLElement; - кнопка закрытия
+### Методы класса
+protected handleEscUp(evt: KeyboardEvent): void - обрабатывает нажатие клавиши Escape для закрытия модального окна;
+ set content(value: HTMLElement) - устанавливает содержимое модального окна
+### Интерфейс
+interface IModal {
+    content: HTMLElement;
+}
+
+
+Header
+### Зона ответственности 
+Отображает шапку сайта;
+Управляет иконкой корзины;
+Отображает счетчик товаров в корзине;
+### Конструктор класс и принимаемые параметры
+ constructor(container: HTMLElement, protected events: IEvents)
+### Поля класса
+    protected counterElement: HTMLElement; - счетчик товаров
+    protected basketButton: HTMLButtonElement;- кнопка корзины
+### Методы класса
+ set counter(value: number) * - обновляет счетчик товаров
+### Интерфейс
+interface IHeader {
+    counter:number
+}
+
+Gallery
+### Зона ответственности 
+Отображает каталог товаров на главной странице
+### Конструктор класс и принимаемые параметры
+constructor(container: HTMLElement)
+### Методы класса
+set list(items: HTMLElement[]) - устанавливает список карточек товаров
+### Интерфейс
+interface IGallery {
+    list: HTMLElement[];
+}
+
+BasketView
+### Зона ответственности 
+Отображает содержимое корзины
+Показывает список товаров в корзине или сообщение "Корзина пуста"
+Отображает общую стоимость товаров
+### Конструктор класс и принимаемые параметры
+constructor(container: HTMLElement, private readonly events: IEvents)
+### Поля класса
+protected listElement: HTMLElement; - контейнер списка товаров
+    protected totalElement: HTMLElement; - элемент общей стоимости
+    protected button: HTMLButtonElement; - кнопка оформления
+### Методы класса
+ set total(value: number) - устанавливает общую стоимость
+ set items(items: HTMLElement[]) - устанавливает список товаров
+### Интерфейс
+interface IBasketView {
+    items: HTMLElement[];
+    total: number;
+}
+
+Success
+### Зона ответственности 
+Отображает экран успешного оформления заказа
+### Конструктор класс и принимаемые параметры
+constructor(container: HTMLElement, protected events: IEvents)
+### Поля класса
+ protected description: HTMLElement;
+    protected closeButton: HTMLButtonElement; - кнопка закрытия
+### Методы класса
+set total(value: number) - устанавливает списанную сумму
+### Интерфейс
+export interface ISuccess {
+    total: number;
+}
+
+## «Презентер»
+### Расположение
+Код презентера находится в файле main.ts
+### Подход
+Использован событийно-ориентированный подход без выделения презентера в отдельный класс.
+### Обоснование
+Приложение имеет только одну страницу;
+Логика взаимодействия между компонентами достаточно прямолинейна;
+### Зона ответственности
+### Инициализация компонентов:
+Создание экземпляров моделей данных (Basket, Buyer, CatalogProduct);
+Создание экземпляра API (WebLarekApi);
+Инициализация системы событий (EventEmitter);
+Создание компонентов представления (Header, Gallery, Modal и др.);
+### Координация взаимодействия:
+Подписка на события от моделей и представлений;
+Обработка событий и вызов соответствующих методов;
+Передача данных между слоями приложения;
+### Управление бизнес-логикой:
+Загрузка каталога товаров с сервера;
+Обработка добавления/удаления товаров из корзины;
+Валидация данных форм;
+Отправка заказа на сервер;
+Управление модальными окнами;

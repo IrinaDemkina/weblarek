@@ -15,7 +15,7 @@ export interface IProduct {
   image: string;
   title: string;
   category: string;
-  price: number | null;
+  price: number | undefined;
 }
 export interface IBuyer {
   payment: TPayment;
