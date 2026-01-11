@@ -1,4 +1,3 @@
-import { IEvents } from "../base/Events";
 import { ensureElement } from "../../utils/utils";
 import { CDN_URL, categoryMap } from "../../utils/constants";
 import { Card, ICard } from "./Card";
@@ -12,15 +11,13 @@ export class CatalogCard  extends Card<ICatalogCard> {
     protected imageCard: HTMLImageElement;
     protected categoryCard: HTMLElement;
 
-    constructor(container: HTMLElement, events: IEvents) {
-        super(container, events)
+    constructor(container: HTMLElement, onClick: ()=> void) {
+        super(container)
 
         this.imageCard = ensureElement<HTMLImageElement>('.card__image', this.container);
         this.categoryCard = ensureElement<HTMLElement>('.card__category', this.container);
 
-        this.container.addEventListener( 'click', () => {
-            this.events.emit('card:select', {id: this.idCard});
-        });
+        this.container.addEventListener('click', onClick);
     }
 
     set image(value: string) {

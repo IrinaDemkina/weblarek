@@ -1,5 +1,4 @@
 import { Component } from "../base/Component";
-import { IEvents } from "../base/Events";
 import { ensureElement } from "../../utils/utils";
 
 export interface ICard {
@@ -11,18 +10,12 @@ export interface ICard {
 export abstract class Card<T extends ICard> extends Component<T> {
     protected titleCard: HTMLElement;
     protected priceCard: HTMLElement;
-    protected idCard: string = '';
 
-    constructor (container: HTMLElement, protected events: IEvents) {
+    constructor (container: HTMLElement) {
         super(container);
 
         this.titleCard = ensureElement<HTMLElement>('.card__title', this.container);
         this.priceCard = ensureElement<HTMLElement>('.card__price', this.container);
-    }
-
-    set id(text: string) {
-        this.idCard = text;
-        this.container.dataset.id = text;
     }
 
     set title(text: string) {

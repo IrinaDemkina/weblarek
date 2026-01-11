@@ -1,9 +1,9 @@
 import { IEvents } from '../base/Events';
-import { Form } from './Form';
+import { Form, IForm } from './Form';
 import { ensureElement } from '../../utils/utils';
 import { TPayment } from '../../types';
 
-export interface IOrderForm {
+export interface IOrderForm extends IForm {
     payment: TPayment;
     address: string;
 }
@@ -21,13 +21,11 @@ export class OrderForm extends Form<IOrderForm> {
         this.addressInput = ensureElement<HTMLInputElement>('input[name="address"]', this.container);
 
         this.buttonCard.addEventListener('click', () => {
-            this.setPaymentMethod('card');
             this.onInputChange('payment', 'card');
         });
 
         this.buttonCash.addEventListener('click', () => {
-            this.setPaymentMethod('cash');
-            this.onInputChange('payment', 'cash');
+           this.onInputChange('payment', 'cash');
         });
 
     }

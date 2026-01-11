@@ -1,4 +1,3 @@
-import { IEvents } from "../base/Events";
 import { ensureElement } from "../../utils/utils";
 import { ICatalogCard } from "./CatalogCard";
 import { Card} from "./Card";
@@ -6,7 +5,8 @@ import { CDN_URL, categoryMap } from "../../utils/constants";
 
 export interface IPreviewCard extends ICatalogCard {
     description: string;
-    inBasket?: boolean;
+    buttonActive: boolean;
+    buttonText: string;
 }
 
 export class PreviewCard extends Card<IPreviewCard> {
@@ -14,17 +14,15 @@ export class PreviewCard extends Card<IPreviewCard> {
     protected categoryCard: HTMLElement;
     protected descriptionCard: HTMLElement;
     protected buttonCard: HTMLButtonElement;
-    protected priceCd: null | number |undefined;
 
-    constructor(container: HTMLElement, events: IEvents) {
-        super(container, events);
+    constructor(container: HTMLElement, onClick: () => void) {
+        super(container);
         this.imageCard = ensureElement<HTMLImageElement>('.card__image', this.container);
         this.categoryCard = ensureElement<HTMLElement>('.card__category', this.container);
         this.descriptionCard = ensureElement<HTMLElement>('.card__text', this.container);
         this.buttonCard = ensureElement<HTMLButtonElement>('.card__button', this.container);
-        this.buttonCard.addEventListener('click', () => {
-        this.events.emit('preview:action', {id: this.idCard});
-        });
+
+        this.buttonCard.addEventListener('click', onClick);
     }
 
     set image(value: string) {
@@ -44,29 +42,13 @@ export class PreviewCard extends Card<IPreviewCard> {
         this.descriptionCard.textContent = value;
     }
 
-    set price(value: number | null | undefined) {
-        this.priceCd = value;
-        super.price = value;
-    
-        if (value === null || value === undefined) {
-            this.buttonCard.disabled = true;
-            this.buttonCard.textContent = 'Недоступно';
-        } else {
-            this.buttonCard.disabled = false;
-        }
+    set buttonText(value: string) {
+        this.buttonCard.textContent = value;
     }
 
-    set inBasket(value: boolean) {
-        if (this.priceCd === null || this.priceCd === undefined) {
-            this.buttonCard.disabled = true;
-            this.buttonCard.textContent = 'Недоступно';
-            return;
-        }
-        
-        if (value) {
-            this.buttonCard.textContent = 'Удалить из корзины';
-        } else {
-            this.buttonCard.textContent = 'В корзину';
-        }
+    set buttonActive(value: boolean) {
+        this.buttonCard.disabled = !value 
     }
+
+   
 }

@@ -4,18 +4,18 @@ import { ensureElement } from '../../utils/utils';
 
 export interface IForm {
     valid: boolean;
-    errors: string[];
+    errors: string;
 }
 
-export abstract class Form<T> extends Component<IForm> {
+export abstract class Form<T> extends Component<T> {
     protected submitButton: HTMLButtonElement;
-    protected errorss: HTMLElement;
+    protected _errors: HTMLElement;
 
     constructor(protected container: HTMLFormElement, protected events: IEvents) {
         super(container);
 
     this.submitButton = ensureElement<HTMLButtonElement> ('button[type=submit]', this.container);
-    this.errorss = ensureElement<HTMLElement> ('.form__errors', this.container);
+    this._errors = ensureElement<HTMLElement> ('.form__errors', this.container);
 
     this.container.addEventListener('submit', (event: Event) => {
         event.preventDefault();
@@ -35,8 +35,8 @@ export abstract class Form<T> extends Component<IForm> {
     }
 
     set error(value: string) {
-        if (this.errorss) {
-            this.errorss.textContent = value;
+        if (this._errors) {
+            this._errors.textContent = value;
         }
     }
 

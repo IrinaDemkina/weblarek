@@ -40,11 +40,31 @@ const orderForm = new OrderForm(cloneTemplate(orderTemplate), events);
 const contactsForm = new ContactsForm(cloneTemplate(contactsTemplate), events);
 const successView = new Success(cloneTemplate(successTemplate), events);
 
+function renderForm(): void {
+  const orderErr = buyer.validateOrderForm();
+  const errorMessage = Object.values(orderErr).filter(Boolean);
+  const buyerData = buyer.getData();
+  console.log("renderForm render call s")
+  modal.content = orderForm.render({
+    payment: buyerData.payment,
+    address: buyerData.address,
+    valid: errorMessage.length === 0,
+    errors: errorMessage.join(',')
+  });
+  console.log("renderForm render call e")
+  
+}
+
 function renderBasket(): void {
   const items = basket.getItems();
   const basketView = new BasketView(cloneTemplate(basketTemplate), events);
   const basketCards = items.map((item, index) => {
-    const card = new BasketCard(cloneTemplate(basketCardTemplate), events);
+    const card = new BasketCard(
+      cloneTemplate(basketCardTemplate),
+      () => {
+        events.emit('basket:remove', {id: item.id})
+      }
+    );
     return card.render({
       id: item.id,
       title: item.title,
@@ -69,7 +89,12 @@ webLarekApi.getProductList().then((data) => {
 events.on('catalog:changed', () => {
   const products = catalogProduct.getProducts();
   const cards = products.map(product => {
-    const card = new CatalogCard(cloneTemplate(cardCatalogTemplate), events);
+    const card = new CatalogCard(
+      cloneTemplate(cardCatalogTemplate),
+      ()=>{
+        events.emit('card:select', {id: product.id})
+      }
+      );
     return card.render({
       id: product.id,
       title: product.title,
@@ -83,15 +108,21 @@ events.on('catalog:changed', () => {
 
 events.on('product:changed', (data: { product: IProduct }) => {
   const product = data.product;
-  const preview = new PreviewCard(cloneTemplate(cardPreviewTemplate), events);
+  const isActive = product.price? true : false;
+  const preview = new PreviewCard(
+    cloneTemplate(cardPreviewTemplate),
+    () => {
+      events.emit('preview:action', {id: product.id})
+    }
+    );
   modal.content = preview.render({
-    id: product.id,
     title: product.title,
     image: product.image,
     category: product.category,
     price: product.price,
     description: product.description,
-    inBasket: basket.hasItem(product.id)
+    buttonActive: isActive,
+    buttonText: isActive? basket.hasItem(product.id)? "Убрать из корзины" : "Купить" : "Недоступно"
   });
   modal.open();
 });
@@ -148,17 +179,9 @@ events.on('basket:remove', (data: { id: string }) => {
 });
 
 events.on('basket:checkout', () => {
-  const orderErr = buyer.validateOrderForm();
-  const errorMessage = Object.values(orderErr).filter(Boolean);
-  const buyerData = buyer.getData();
-  orderForm.render({
-    payment: buyerData.payment,
-    address: buyerData.address,
-    valid: errorMessage.length === 0,
-    errors: errorMessage.join(',')
-  });
-  modal.content = orderForm.container;
+  renderForm();
   modal.open();
+  
 });
 
 events.on('form:change', (data: { field: string; value: string }) => {
@@ -178,6 +201,8 @@ events.on('form:change', (data: { field: string; value: string }) => {
         buyer.setPhone(value);
         break;
     }
+
+    renderForm();
 });
 
 events.on('order:submit', () => {
@@ -193,19 +218,16 @@ events.on('order:submit', () => {
   const errorMessages = Object.values(contactsErrors).filter(Boolean);
   const buyerData = buyer.getData();
  
-  contactsForm.render({
+  modal.content = contactsForm.render({
     email: buyerData.email,
     phone: buyerData.phone,
     valid: errorMessages.length === 0,
     errors: errorMessages.join(', ')
   });
-  modal.content = contactsForm.container;
+  
 });
 
 events.on('contacts:submit', () => {
-  if (!buyer.isValid()) {
-    return;
-  }
 
   const data = buyer.getData();
 
@@ -216,13 +238,13 @@ events.on('contacts:submit', () => {
     phone: data.phone,
     total: basket.getTotalPrice(),
     items: basket.getItems()
-    .filter(item => item.price !== null)
     .map(item => item.id)
   };
   webLarekApi.createOrder(orderData)
   .then((result) => {
-    successView.total = result.total;
-    modal.content = successView.container;
+    modal.content = successView.render({
+      total: result.total
+    });
     basket.clear();
     buyer.clearData();
   })
@@ -246,83 +268,3 @@ webLarekApi.getProductList().then((data) => {
   .catch((error) => {
     console.error('Ошибка coeдинения с сервером', error);
   });
-/**
-console.log('Тестирование класса CatalogProduct\n');
-
-const catalogModel = new CatalogProduct();
-catalogModel.saveProducts(apiProducts.items);
-console.log('Массив товаров из каталога:',catalogModel.getProducts());
-const productId = apiProducts.items[1]?.id;
-const foundProduct =catalogModel.getProductId(productId);
-console.log(`Товар с id ${productId}:`, foundProduct)
-if (foundProduct) {
-  catalogModel.saveSelectedProduct(foundProduct);
-  console.log('Выбранный товар:', catalogModel.getSelectedProduct());
-} else {
-  console.log('Выбранный товар не найден');
-}
-
-console.log('Тестирование класса Buyer');
-
-const buyerModel = new Buyer();
-console.log('Создаем покупателя с пустыми данными');
-console.log('Данные покупателя:', buyerModel.getData());
-console.log('Валидация пустых данных');
-console.log('Ошибки валидации:', buyerModel.validate());
-console.log('Данные валидны?', buyerModel.isValid());
-buyerModel.setPayment('card');
-console.log('Установливаем способ оплаты: card');
-console.log('Данные покупателя:', buyerModel.getData());
-console.log('Ошибки валидации:', buyerModel.validate());
-console.log('Установка оставшихся данных');
-buyerModel.setAddress('г. Москва, ул. Жулебинский бульвар д.40');
-buyerModel.setEmail('test@teestle.com');
-buyerModel.setPhone('+7 999 999-99-99');
-console.log('Данные покупателя:', buyerModel.getData());
-console.log('Ошибки валидации:', buyerModel.validate());
-console.log('Данные валидны?', buyerModel.isValid());
-buyerModel.clearData();
-console.log('После очистки:', buyerModel.getData());
-
-console.log('Тестирование класса Basket');
-
-const basketModel = new Basket();
-console.log('Количество товаров в корзине:', basketModel.getTotalCount());
-console.log('Общая стоимость:', basketModel.getTotalPrice(), 'рублей');
-const product1 = apiProducts.items[0];
-const product2 = apiProducts.items[3];
-basketModel.addItem(product1);
-console.log('Добавляем первый товар в корзину:', product1.title);
-console.log('Товары в корзине:', basketModel.getItems().map(item => item.title));
-console.log('Количество товаров в корзине:', basketModel.getTotalCount());
-console.log('Общая стоимость:', basketModel.getTotalPrice(), 'рублей');
-basketModel.addItem(product2);
-console.log('Добавляем второй товар в корзину:', product2.title);
-console.log('Товары в корзине:', basketModel.getItems().map(item => item.title));
-console.log('Количество товаров в корзине:', basketModel.getTotalCount());
-console.log('Общая стоимость:', basketModel.getTotalPrice(), 'рублей');
-basketModel.removeItem(product2.id);
-console.log('Удаляем второй товар из корзины:', product2.title);
-console.log('Товары в корзине:', basketModel.getItems().map(item => item.title));
-console.log('Количество товаров:', basketModel.getTotalCount());
-console.log('Общая стоимость:', basketModel.getTotalPrice(), 'рублей');
-console.log(`Проверка наличия первого товара в корзине:`, basketModel.hasItem(product1.id));
-basketModel.clear();
-console.log('Очищаем корзину');
-console.log('Товары в корзине:', basketModel.getItems());
-console.log('Количество товаров:', basketModel.getTotalCount());
-console.log('Общая стоимость:', basketModel.getTotalPrice(), 'рублей');
-
-console.log('Тестирование класса WebLarekApi');
-
-const api = new Api(API_URL);
-const webLarekApiModel = new WebLarekApi(api);
-webLarekApiModel.getProductList()
-  .then((data) => {
-    catalogModel.saveProducts(data.items);
-    console.log('Массив товаров из каталога (получен с сервера):', catalogModel.getProducts());
-  })
-  .catch((error) => {
-    console.error('Ошибка при получении товаров:', error);
-  });
-  */
