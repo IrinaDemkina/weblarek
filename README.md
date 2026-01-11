@@ -205,7 +205,7 @@ getProductList(): Promise<IProductList> - делает get запрос на э�
 
  ## Классы
 
- Card
+###  Card
 ### Зона ответственности 
 Aбстрактный класс для всех типов карточек товара;
 Родительский класс для CatalogCard, PreviewCard, BasketCard;
@@ -226,7 +226,7 @@ typescriptDownloadCopy codeinterface ICard {
     price: number | null | undefined;
 }
 
-CatalogCard
+### CatalogCard
 ### Зона ответственности 
 Отображает карточку товара в каталоге на главной странице;
 Показывает изображение, категорию, название и цену;
@@ -246,7 +246,7 @@ export interface ICatalogCard extends ICard {
     category: string;
 }
 
-PreviewCard
+### PreviewCard
 ### Зона ответственности 
 Отображает детальную информацию о товаре в модальном окне;
 Управляет кнопкой "Купить" / "Удалить из корзины" / "Недоступно";
@@ -270,7 +270,7 @@ export interface IPreviewCard extends ICatalogCard {
     inBasket?: boolean;
 }
 
-BasketCard
+### BasketCard
 ### Зона ответственности 
 Отображает карточку товара в корзине;
 Показывает порядковый номер, название, цену;
@@ -286,7 +286,7 @@ export interface IBasketCard extends ICard {
     index: number;
 }
 
-Form
+### Form
 ### Зона ответственности 
 Абстрактный класс для всех форм;
 Управляет состоянием кнопки отправки;
@@ -307,7 +307,7 @@ export interface IForm {
     errors: string[];
 }
 
-OrderForm
+### OrderForm
 ### Зона ответственности 
 Форма первого шага оформления заказа;
 Выбор способа оплаты (card/cash);
@@ -328,7 +328,7 @@ export interface IOrderForm {
     address: string;
 }
 
-ContactsForm
+### ContactsForm
 ### Зона ответственности
 Форма второго шага оформления заказа;
 Ввод email покупателя;
@@ -350,7 +350,7 @@ export interface IContactsForm {
     email: string;
 }
 
-Modal
+### Modal
 ### Зона ответственности 
 Управляет модальным окном;
 Открытие и закрытие модального окна;
@@ -370,7 +370,7 @@ interface IModal {
 }
 
 
-Header
+### Header
 ### Зона ответственности 
 Отображает шапку сайта;
 Управляет иконкой корзины;
@@ -387,7 +387,7 @@ interface IHeader {
     counter:number
 }
 
-Gallery
+### Gallery
 ### Зона ответственности 
 Отображает каталог товаров на главной странице
 ### Конструктор класс и принимаемые параметры
@@ -399,7 +399,7 @@ interface IGallery {
     list: HTMLElement[];
 }
 
-BasketView
+### BasketView
 ### Зона ответственности 
 Отображает содержимое корзины
 Показывает список товаров в корзине или сообщение "Корзина пуста"
@@ -419,7 +419,7 @@ interface IBasketView {
     total: number;
 }
 
-Success
+### Success
 ### Зона ответственности 
 Отображает экран успешного оформления заказа
 ### Конструктор класс и принимаемые параметры
